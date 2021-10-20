@@ -1,0 +1,51 @@
+[tool.poetry]
+name = "jdetr"
+version = "0.1"
+description = ""
+authors = ["Daniel Suess <suess.daniel@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.8.3,<3.9"
+jax = {extras = ["cpu"], version = "^0.2.24"}
+tensorflow-cpu = "^2.6.0"
+typer = "^0.3.2"
+tqdm = "^4.62.1"
+cloudpathlib = "^0.4.1"
+gin-config = "^0.4.0"
+elegy = "^0.7.4"
+
+[tool.poetry.dev-dependencies]
+black = "^21.7b0"
+pylint = "^2.9.6"
+isort = "^5.9.3"
+pytest = "^6.2.4"
+pdbpp = "^0.10.3"
+pyright = "^0.0.8"
+ipykernel = "^6.1.0"
+
+[tool.pyright]
+
+[tool.pylint.variables]
+good-names = ["T", "x", "y"]
+
+[tool.pylint.messages_control]
+disable = ["C0114", "C0115", "C0116", "R1705", "W0511", "R0913", "R0902"]
+
+[tool.pytest.ini_options]
+addopts = "--doctest-modules -m 'not models'"
+testpaths = ["jdetr", "tests"]
+filterwarnings = [
+    "ignore:the imp module is deprecated in favour of importlib:DeprecationWarning"
+]
+markers = [
+    "models: marks long running tests that require an accelerator",
+]
+
+[tool.isort]
+profile = "black"
+line_length = 80
+multi_line_output = 3
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
