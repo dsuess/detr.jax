@@ -45,6 +45,7 @@ def get_positional_encoding2d(
     >>> tuple(y.shape)
     (7, 7, 128)
     """
+    # pylint: disable=invalid-name
     xs = 1 + jnp.arange(grid_size, dtype=jnp.float32)
     ks = jnp.arange(num_pos_features, dtype=jnp.float32)
     ks = jnp.power(temperature, -2 * (ks // 2) / num_pos_features)

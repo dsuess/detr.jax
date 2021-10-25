@@ -16,13 +16,13 @@ test-models:
     poetry run pytest -m models
 
 lint:
-    poetry run isort --check jass tests
-    poetry run black --check --include .py --exclude ".pyc|.pyi|.so" jass tests
-    poetry run black --check --pyi --include .pyi --exclude ".pyc|.py|.so" jass tests
-    poetry run pylint jass
-    poetry run pyright jass tests
+    poetry run isort --check jdetr tests
+    poetry run black --check --include .py --exclude ".pyc|.pyi|.so" jdetr tests
+    poetry run black --check --pyi --include .pyi --exclude ".pyc|.py|.so" jdetr tests
+    poetry run pylint jdetr
+    poetry run pyright jdetr tests
 
 fix:
-   poetry run isort jass tests
-   poetry run black --include .py --exclude ".pyc|.pyi|.so" jass tests
-   poetry run black --pyi --include .pyi --exclude ".pyc|.py|.so" jass tests
+   poetry run isort jdetr tests
+   poetry run black --include .py --exclude ".pyc|.pyi|.so" jdetr tests
+   poetry run black --pyi --include .pyi --exclude ".pyc|.py|.so" jdetr tests
