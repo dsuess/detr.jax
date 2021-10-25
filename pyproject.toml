@@ -12,7 +12,8 @@ typer = "^0.3.2"
 tqdm = "^4.62.1"
 cloudpathlib = "^0.4.1"
 gin-config = "^0.4.0"
-elegy = "^0.7.4"
+elegy = { git = "https://github.com/poets-ai/elegy", rev = "2be3198859e142f744ea8e9982cf90169baba776" }
+tensorflow-datasets = "^4.4.0"
 
 [tool.poetry.dev-dependencies]
 black = "^21.7b0"
@@ -22,6 +23,9 @@ pytest = "^6.2.4"
 pdbpp = "^0.10.3"
 pyright = "^0.0.8"
 ipykernel = "^6.1.0"
+jupyter = "^1.0.0"
+notebook = "^6.4.5"
+Pillow = "^8.4.0"
 
 [tool.pyright]
 
