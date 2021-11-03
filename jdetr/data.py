@@ -1,3 +1,4 @@
+# pylint: disable=no-value-for-parameter,unexpected-keyword-arg
 from typing import Callable, Tuple
 
 import tensorflow as tf
@@ -8,22 +9,6 @@ DataTuple = Tuple[tf.Tensor, tf.Tensor, tf.Tensor]
 def resize_square(
     new_size: int,
 ) -> Callable[[tf.Tensor, tf.Tensor, tf.Tensor], DataTuple]:
-    """
-    >>> import numpy as np
-    >>> image = np.zeros((640, 480, 3), dtype=np.uint8)
-    >>> boxes = np.array([[0.43910939, 0.79495835, 0.7267344 , 0.9483542 ],
-    ...                  [0.08571875, 0.31514582, 0.6987031 , 0.9939375 ],
-    ...                  [0.344125  , 0.        , 0.63554686, 0.32766667],
-    ...                  [0.54446876, 0.80670834, 0.5626875 , 0.8576458 ]])
-    >>> labels = np.array([0, 1, 2, 3])
-    >>> image_, boxes_, labels_ = resize_square(1000)(image, boxes, labels)
-    >>> tuple(image_.shape)
-    (1000, 1000, 3)
-    >>> assert tuple(labels) == tuple(labels_)
-    >>> assert np.all(boxes_ <= 1) and np.all(boxes_ >= 0)
-
-    """
-    # pylint: disable=no-value-for-parameter,unexpected-keyword-arg
     new_size = tf.constant(new_size, dtype=tf.float32)
 
     def inner(image: tf.Tensor, boxes: tf.Tensor, labels: tf.Tensor) -> DataTuple:
@@ -45,5 +30,38 @@ def resize_square(
         boxes /= new_size
 
         return image, boxes, labels
+
+    return inner
+
+
+def pad_boxes(max_boxes: int):
+    def inner(
+        image: tf.Tensor, boxes: tf.Tensor, labels: tf.Tensor
+    ) -> Tuple[tf.Tensor, tf.Tensor, tf.Tensor, tf.Tensor]:
+        n_boxes = tf.shape(boxes)[0]
+        num_pad_boxes = tf.maximum(max_boxes - n_boxes, 0)
+
+        boxes = tf.concat(
+            (
+                boxes[:max_boxes],
+                tf.zeros((num_pad_boxes, 4), dtype=boxes.dtype),
+            ),
+            axis=0,
+        )
+        labels = tf.concat(
+            (
+                labels[:max_boxes],
+                tf.zeros((num_pad_boxes,), dtype=labels.dtype),
+            ),
+            axis=0,
+        )
+        is_valid = tf.concat(
+            (
+                tf.ones((max_boxes - num_pad_boxes,), dtype=tf.bool),
+                tf.zeros((num_pad_boxes,), dtype=tf.bool),
+            ),
+            axis=0,
+        )
+        return image, boxes, labels, is_valid
 
     return inner
