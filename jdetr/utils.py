@@ -1,3 +1,5 @@
+from typing import Optional, TypeVar
+
 import haiku as hk
 import jax
 
@@ -28,3 +30,10 @@ class Init:
             return result
 
         return func_runner
+
+
+T = TypeVar("T")
+
+
+def maybe(value: Optional[T], default: T) -> T:
+    return value if value is not None else default

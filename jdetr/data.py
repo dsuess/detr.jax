@@ -23,6 +23,7 @@ def resize_square(
     >>> assert np.all(boxes_ <= 1) and np.all(boxes_ >= 0)
 
     """
+    # pylint: disable=no-value-for-parameter,unexpected-keyword-arg
     new_size = tf.constant(new_size, dtype=tf.float32)
 
     def inner(image: tf.Tensor, boxes: tf.Tensor, labels: tf.Tensor) -> DataTuple:

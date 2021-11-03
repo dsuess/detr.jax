@@ -9,6 +9,12 @@ setup-tpu:
         jax[tpu]==`poetry export | grep jax== | cut -d';' -f1 | cut -d'=' -f3` \
         -f https://storage.googleapis.com/jax-releases/libtpu_releases.html
 
+setup-cuda:
+    @just setup
+    poetry run pip install \
+        jax[cuda]==`poetry export | grep jax== | cut -d';' -f1 | cut -d'=' -f3` \
+        -f https://storage.googleapis.com/jax-releases/libtpu_releases.html
+
 test:
     poetry run pytest
 

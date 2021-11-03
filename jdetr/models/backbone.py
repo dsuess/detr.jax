@@ -29,7 +29,7 @@ class HeadlessResnet(hk.nets.ResNet):
 class ResNet50(HeadlessResnet, hk.nets.ResNet50):
     """
     >>> from jdetr.utils import Init
-    >>> x = jnp.zeros((1, 224, 224, 3))
+    >>> x = jax.numpy.zeros((1, 224, 224, 3))
     >>> y = Init(ResNet50, 0).__call__(x, is_training=True)
     >>> y.shape
     (1, 7, 7, 2048)
