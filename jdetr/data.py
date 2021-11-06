@@ -8,10 +8,11 @@ DataTuple = Tuple[tf.Tensor, tf.Tensor, tf.Tensor]
 
 def resize_square(
     new_size: int,
-) -> Callable[[tf.Tensor, tf.Tensor, tf.Tensor], DataTuple]:
+) -> Callable[[DataTuple], DataTuple]:
     new_size = tf.constant(new_size, dtype=tf.float32)
 
-    def inner(image: tf.Tensor, boxes: tf.Tensor, labels: tf.Tensor) -> DataTuple:
+    def inner(data: DataTuple) -> DataTuple:
+        image, boxes, labels = data
         shape = tf.cast(tf.shape(image), tf.float32)
         box_scale_factor = tf.concat((shape[:2], shape[:2]), axis=0)
         boxes = boxes * box_scale_factor[None]
@@ -34,10 +35,9 @@ def resize_square(
     return inner
 
 
-def pad_boxes(max_boxes: int):
-    def inner(
-        image: tf.Tensor, boxes: tf.Tensor, labels: tf.Tensor
-    ) -> Tuple[tf.Tensor, tf.Tensor, tf.Tensor, tf.Tensor]:
+def pad_boxes(max_boxes: int) -> Callable[[DataTuple], DataTuple]:
+    def inner(data: DataTuple) -> DataTuple:
+        image, boxes, labels = data
         n_boxes = tf.shape(boxes)[0]
         num_pad_boxes = tf.maximum(max_boxes - n_boxes, 0)
 
@@ -50,18 +50,11 @@ def pad_boxes(max_boxes: int):
         )
         labels = tf.concat(
             (
-                labels[:max_boxes],
+                labels[:max_boxes] + 1,
                 tf.zeros((num_pad_boxes,), dtype=labels.dtype),
             ),
             axis=0,
         )
-        is_valid = tf.concat(
-            (
-                tf.ones((max_boxes - num_pad_boxes,), dtype=tf.bool),
-                tf.zeros((num_pad_boxes,), dtype=tf.bool),
-            ),
-            axis=0,
-        )
-        return image, boxes, labels, is_valid
+        return image, boxes, labels
 
     return inner

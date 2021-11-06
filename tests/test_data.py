@@ -15,13 +15,14 @@ def test_resize_square():
     )
     labels = np.array([0, 1, 2, 3])
 
-    image_, boxes_, labels_ = resize_square(1000)(image, boxes, labels)
+    image_, boxes_, labels_ = resize_square(1000)((image, boxes, labels))
     assert tuple(image_.shape) == (1000, 1000, 3)
     assert tuple(labels) == tuple(labels_)
     assert np.all(boxes_.numpy() <= 1) and np.all(boxes_.numpy() >= 0)
 
 
 def test_pad_boxes():
+    image = np.zeros((640, 480, 3), dtype=np.uint8)
     boxes = np.array(
         [
             [0.43910939, 0.79495835, 0.7267344, 0.9483542],
@@ -31,8 +32,8 @@ def test_pad_boxes():
     )
     labels = np.array([1, 2, 3])
 
-    _, boxes_, labels_, is_valid = pad_boxes(10)(None, boxes, labels)
-    boxes_, labels_, is_valid = boxes_.numpy(), labels_.numpy(), is_valid.numpy()
+    _, boxes_, labels_ = pad_boxes(10)((image, boxes, labels))
+    boxes_, labels_ = boxes_.numpy(), labels_.numpy()
 
-    assert np.all(is_valid[:3] == 1) and np.all(is_valid[3:] == 0)
-    assert np.all(boxes == boxes_[:3]) and np.all(labels == labels_[:3])
+    assert np.all(labels_[:3] > 0) and np.all(labels_[3:] == 0)
+    assert np.all(boxes == boxes_[:3]) and np.all(labels == labels_[:3] - 1)
