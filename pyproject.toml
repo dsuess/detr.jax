@@ -12,8 +12,9 @@ typer = "^0.3.2"
 tqdm = "^4.62.1"
 cloudpathlib = "^0.4.1"
 gin-config = "^0.4.0"
-elegy = { git = "https://github.com/poets-ai/elegy", rev = "2be3198859e142f744ea8e9982cf90169baba776" }
+scenic = { git = "https://github.com/google-research/scenic", rev = "main" }
 tensorflow-datasets = "^4.4.0"
+dm-haiku = "^0.0.5"
 
 [tool.poetry.dev-dependencies]
 black = "^21.7b0"
@@ -30,7 +31,7 @@ Pillow = "^8.4.0"
 [tool.pyright]
 
 [tool.pylint.variables]
-good-names = ["T", "x", "y"]
+good-names = ["T", "x", "y", "x1", "y1", "x2", "y2"]
 
 [tool.pylint.messages_control]
 disable = ["C0114", "C0115", "C0116", "R1705", "W0511", "R0913", "R0902"]
