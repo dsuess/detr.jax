@@ -1,4 +1,4 @@
-from typing import Callable, Tuple
+from typing import Callable, NamedTuple, Tuple
 
 import jax
 from jax import numpy as jnp
@@ -47,18 +47,27 @@ def box_giou(boxes1: JaxArray, boxes2: JaxArray):
     return intersection / union - (area - union) / area
 
 
+class SetCriterionLosses(NamedTuple):
+    l1_loss: JaxArray
+    giou_loss: JaxArray
+    labels_loss: JaxArray
+    unmatched_labels_loss: JaxArray
+
+
 class SetCriterion:
     def __init__(
         self,
-        matcher_l1_weight: float = 1.0,
-        matcher_giou_weight: float = 1.0,
+        l1_weight: float = 1.0,
+        giou_weight: float = 1.0,
         matcher_label_weight: float = 1.0,
+        negative_weight: float = 0.1,
         matcher: Callable[[JaxArray], JaxArray] = hungarian_single,
     ):
         self.matcher = matcher
-        self.matcher_l1_weight = matcher_l1_weight
-        self.matcher_giou_weight = matcher_giou_weight
+        self.l1_weight = l1_weight
+        self.giou_weight = giou_weight
         self.matcher_label_weight = matcher_label_weight
+        self.negative_weight = negative_weight
 
     def match_predictions(
         self,
@@ -75,8 +84,8 @@ class SetCriterion:
         labels_loss = -labels_pred[:, labels_true]
         giou_loss = 1 - box_giou(box_pred[:, None], box_true[None, :])
         cost_matrix = (
-            self.matcher_l1_weight * box_loss
-            + self.matcher_giou_weight * giou_loss
+            self.l1_weight * box_loss
+            + self.giou_weight * giou_loss
             + self.matcher_label_weight * labels_loss
         )
         idx = self.matcher(cost_matrix)
@@ -88,5 +97,41 @@ class SetCriterion:
         box_true: JaxArray,
         labels_pred: JaxArray,
         labels_true: JaxArray,
-    ) -> JaxArray:
-        ...
+    ) -> Tuple[JaxArray, SetCriterionLosses]:
+        # pylint: disable=too-many-locals
+        is_valid = labels_true > 0
+        box_t_valid, labels_t_valid = box_true[is_valid], labels_true[is_valid]
+        assignment = self.match_predictions(
+            box_pred, box_t_valid, labels_pred, labels_t_valid
+        )
+        idx_pred, idx_true = assignment[..., 0], assignment[..., 1]
+        idx_unmatched = jnp.setdiff1d(jnp.arange(box_pred.shape[0]), idx_pred)
+
+        # loss for matched boxes
+        box_p_valid, labels_p_valid = box_pred[idx_pred], labels_pred[idx_pred]
+        box_t_valid, labels_t_valid = box_true[idx_true], labels_true[idx_true]
+        l1_loss = jnp.sum(jnp.linalg.norm(box_p_valid - box_t_valid, axis=-1, ord=1))
+        giou_loss = jnp.sum(1 - box_giou(box_p_valid, box_t_valid))
+        labels_loss = jnp.sum(
+            -jax.nn.log_softmax(labels_p_valid)[
+                jnp.arange(labels_p_valid.shape[0]), labels_t_valid
+            ]
+        )
+
+        # loss for unmatched boxes
+        if idx_unmatched.shape[0] > 0:
+            logits = labels_pred[idx_unmatched]
+            labels_loss_unmatched = jnp.sum(-jax.nn.log_softmax(logits)[:, 0])
+        else:
+            labels_loss_unmatched = jnp.array(0)
+
+        loss = (
+            labels_loss
+            + self.negative_weight * labels_loss_unmatched
+            + self.l1_weight * l1_loss
+            + self.giou_weight * giou_loss
+        )
+
+        return loss, SetCriterionLosses(
+            l1_loss, giou_loss, labels_loss, labels_loss_unmatched
+        )
