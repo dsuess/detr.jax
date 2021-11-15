@@ -1,18 +1,16 @@
 # pylint: disable=no-value-for-parameter,unexpected-keyword-arg
-from typing import Callable, Tuple
+from typing import Callable, Dict, Tuple
 
 import tensorflow as tf
 
 DataTuple = Tuple[tf.Tensor, tf.Tensor, tf.Tensor]
+Transform = Callable[[tf.Tensor, tf.Tensor, tf.Tensor], DataTuple]
 
 
-def resize_square(
-    new_size: int,
-) -> Callable[[DataTuple], DataTuple]:
+def resize_square(new_size: int) -> Transform:
     new_size = tf.constant(new_size, dtype=tf.float32)
 
-    def inner(data: DataTuple) -> DataTuple:
-        image, boxes, labels = data
+    def inner(image, boxes, labels) -> DataTuple:
         shape = tf.cast(tf.shape(image), tf.float32)
         box_scale_factor = tf.concat((shape[:2], shape[:2]), axis=0)
         boxes = boxes * box_scale_factor[None]
@@ -35,9 +33,8 @@ def resize_square(
     return inner
 
 
-def pad_boxes(max_boxes: int) -> Callable[[DataTuple], DataTuple]:
-    def inner(data: DataTuple) -> DataTuple:
-        image, boxes, labels = data
+def pad_boxes(max_boxes: int) -> Transform:
+    def inner(image, boxes, labels) -> DataTuple:
         n_boxes = tf.shape(boxes)[0]
         num_pad_boxes = tf.maximum(max_boxes - n_boxes, 0)
 
@@ -58,3 +55,7 @@ def pad_boxes(max_boxes: int) -> Callable[[DataTuple], DataTuple]:
         return image, boxes, labels
 
     return inner
+
+
+def get_elems(data: Dict) -> DataTuple:
+    return data["image"], data["objects"]["bbox"], data["objects"]["label"]
