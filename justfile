@@ -5,13 +5,13 @@ setup:
 
 setup-tpu:
     @just setup
-    poetry run pip install \
+    poetry run pip install --upgrade \
         jax[tpu]==`poetry export | grep jax== | cut -d';' -f1 | cut -d'=' -f3` \
         -f https://storage.googleapis.com/jax-releases/libtpu_releases.html
 
 setup-cuda:
     @just setup
-    poetry run pip install \
+    poetry run pip install --upgrade \
         jax[cuda]==`poetry export | grep jax== | cut -d';' -f1 | cut -d'=' -f3` \
         -f https://storage.googleapis.com/jax-releases/libtpu_releases.html
 
