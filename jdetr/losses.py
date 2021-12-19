@@ -76,6 +76,7 @@ class SetCriterion:
         labels_pred: JaxArray,
         labels_true: JaxArray,
     ) -> JaxArray:
+
         box_loss = jnp.linalg.norm(
             box_pred[:, None] - box_true[None, :], axis=-1, ord=1
         )
@@ -83,11 +84,16 @@ class SetCriterion:
         labels_pred = jax.nn.softmax(labels_pred, axis=-1)
         labels_loss = -labels_pred[:, labels_true]
         giou_loss = 1 - box_giou(box_pred[:, None], box_true[None, :])
+
         cost_matrix = (
             self.l1_weight * box_loss
             + self.giou_weight * giou_loss
             + self.matcher_label_weight * labels_loss
         )
+        is_valid = (labels_true > 0).astype(cost_matrix.dtype)[None, :]
+        cost_upper_bound = 4 * self.l1_weight + self.giou_weight
+        cost_matrix = cost_matrix * is_valid + cost_upper_bound * (1 - is_valid)
+
         idx = self.matcher(cost_matrix)
         return jnp.moveaxis(idx, 0, -1)
 
@@ -99,13 +105,10 @@ class SetCriterion:
         labels_true: JaxArray,
     ) -> Tuple[JaxArray, SetCriterionLosses]:
         # pylint: disable=too-many-locals
-        is_valid = labels_true > 0
-        box_t_valid, labels_t_valid = box_true[is_valid], labels_true[is_valid]
         assignment = self.match_predictions(
-            box_pred, box_t_valid, labels_pred, labels_t_valid
+            box_pred, box_true, labels_pred, labels_true
         )
         idx_pred, idx_true = assignment[..., 0], assignment[..., 1]
-        idx_unmatched = jnp.setdiff1d(jnp.arange(box_pred.shape[0]), idx_pred)
 
         # loss for matched boxes
         box_p_valid, labels_p_valid = box_pred[idx_pred], labels_pred[idx_pred]

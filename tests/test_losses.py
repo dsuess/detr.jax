@@ -1,6 +1,7 @@
 import itertools as it
 from typing import List, Tuple
 
+import jax
 import jax.numpy as jnp
 import numpy as np
 import pytest as pt
@@ -77,6 +78,38 @@ def test_set_criterion_incomplete_matching(
     np.testing.assert_array_equal(permutation_arr[idx_pred], 2 * idx_true)
 
 
+def test_set_criterion_matching_batched(
+    some_boxes: Tuple[np.ndarray, np.ndarray],
+):
+    boxes, labels = some_boxes
+    permutations = np.array(list(it.permutations(range(5)))[::10])
+    boxes = jnp.array([boxes] * len(permutations))
+    boxes_permuted = jnp.array([b[idx] for b, idx in zip(boxes, permutations)])
+    labels = np.array([labels] * len(permutations))
+    logits = np.array([to_logits(l[perm]) for l, perm in zip(labels, permutations)])
+    logits = 10000 * logits - 5000
+
+    match = jax.vmap(SetCriterion().match_predictions)
+    indices = match(boxes_permuted, boxes, logits, labels)
+
+    for idx, perm in zip(indices, permutations):
+        idx_pred, idx_true = np.array(idx).T
+        np.testing.assert_array_equal(perm[idx_pred], idx_true)
+
+
+def test_set_criterion_matching_with_invalid_boxes():
+    # Create perfect matching with box that's invalid -> even with
+    # label-weight disabled it should be ignored
+    boxes_gt = jnp.array([[0, 0, 1, 1], [0.25, 0.25, 0.75, 0.75]])
+    labels_gt = jnp.array([1, 0])
+    boxes_pred = jnp.array([[0.25, 0.25, 0.75, 0.75]])
+    labels_pred = jnp.array([[-1000, 1000]])
+
+    criterion = SetCriterion(matcher_label_weight=0)
+    (idx,) = criterion.match_predictions(boxes_pred, boxes_gt, labels_pred, labels_gt)
+    assert idx.tolist() == [0, 0]
+
+
 @pt.mark.parametrize("permutation", list(it.permutations(range(5)))[::10])
 def test_set_criterion_loss(
     some_boxes: Tuple[np.ndarray, np.ndarray],
@@ -91,6 +124,27 @@ def test_set_criterion_loss(
         jnp.array(boxes[permutation_arr]),
         jnp.array(boxes),
         jnp.array(logits[permutation_arr]),
+        jnp.array(labels),
+    )
+
+    np.testing.assert_array_less(loss, 1e-7)
+    assert losses.unmatched_labels_loss == 0.0
+
+
+def test_batched_set_criterion_loss(
+    some_boxes: Tuple[np.ndarray, np.ndarray],
+):
+    boxes, labels = some_boxes
+    permutations = np.array(list(it.permutations(range(5)))[::10])
+    boxes = np.array([boxes] * len(permutations))
+    labels = np.array([labels] * len(permutations))
+    logits = 10000 * to_logits(labels) - 5000
+    criterion = jax.vmap(SetCriterion())
+
+    loss, losses = criterion(
+        jnp.array(boxes[permutations]),
+        jnp.array(boxes),
+        jnp.array(logits[permutations]),
         jnp.array(labels),
     )
 
