@@ -201,14 +201,6 @@ gs = ["google-cloud-storage"]
 s3 = ["boto3"]
 
 [[package]]
-name = "cloudpickle"
-version = "1.6.0"
-description = "Extended pickling support for Python objects"
-category = "main"
-optional = false
-python-versions = ">=3.5"
-
-[[package]]
 name = "clu"
 version = "0.0.6"
 description = "Set of libraries for ML training loops in JAX."
@@ -238,17 +230,6 @@ description = "Cross-platform colored terminal text."
 category = "main"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
-
-[[package]]
-name = "commonmark"
-version = "0.9.1"
-description = "Python parser for the CommonMark Markdown spec"
-category = "main"
-optional = false
-python-versions = "*"
-
-[package.extras]
-test = ["flake8 (==3.7.8)", "hypothesis (==3.55.3)"]
 
 [[package]]
 name = "contextlib2"
@@ -365,19 +346,6 @@ description = "A new flavour of deep learning operations"
 category = "main"
 optional = false
 python-versions = "*"
-
-[[package]]
-name = "elegy"
-version = "0.8.1"
-description = "Elegy is a Neural Networks framework based on Jax and Haiku."
-category = "main"
-optional = false
-python-versions = ">=3.7,<3.10"
-
-[package.dependencies]
-cloudpickle = ">=1.5.0,<2.0.0"
-tensorboardx = ">=2.1,<3.0"
-treex = ">=0.6.3,<0.7.0"
 
 [[package]]
 name = "entrypoints"
@@ -1409,7 +1377,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 name = "pygments"
 version = "2.10.0"
 description = "Pygments is a syntax highlighting package written in Python."
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.5"
 
@@ -1628,22 +1596,6 @@ requests = ">=2.0.0"
 rsa = ["oauthlib[signedtoken] (>=3.0.0)"]
 
 [[package]]
-name = "rich"
-version = "10.13.0"
-description = "Render rich text, tables, progress bars, syntax highlighting, markdown and more to the terminal"
-category = "main"
-optional = false
-python-versions = ">=3.6.2,<4.0.0"
-
-[package.dependencies]
-colorama = ">=0.4.0,<0.5.0"
-commonmark = ">=0.9.0,<0.10.0"
-pygments = ">=2.6.0,<3.0.0"
-
-[package.extras]
-jupyter = ["ipywidgets (>=7.5.1,<8.0.0)"]
-
-[[package]]
 name = "rsa"
 version = "4.7.2"
 description = "Pure-Python RSA implementation"
@@ -1820,7 +1772,7 @@ python-versions = "*"
 
 [[package]]
 name = "tensorboardx"
-version = "2.4"
+version = "2.4.1"
 description = "TensorBoardX lets you watch Tensors Flow without Tensorflow"
 category = "main"
 optional = false
@@ -2157,33 +2109,6 @@ python-versions = ">=3.7"
 test = ["pytest"]
 
 [[package]]
-name = "treeo"
-version = "0.0.8"
-description = ""
-category = "main"
-optional = false
-python-versions = ">=3.7,<4.0"
-
-[package.dependencies]
-typing-extensions = ">=3.7.0"
-
-[[package]]
-name = "treex"
-version = "0.6.3"
-description = ""
-category = "main"
-optional = false
-python-versions = ">=3.7,<4.0"
-
-[package.dependencies]
-einops = ">=0.3.2,<0.4.0"
-flax = ">=0.3.4,<0.4.0"
-optax = ">=0.0.9,<0.0.10"
-PyYAML = ">=5.4.1,<6.0.0"
-rich = ">=10.7.0,<11.0.0"
-treeo = ">=0.0.8,<0.0.9"
-
-[[package]]
 name = "typer"
 version = "0.3.2"
 description = "Typer, build great CLIs. Easy to code. Based on Python type hints."
@@ -2290,7 +2215,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8.3,<3.9"
-content-hash = "ab6321ae59ee60414f26e1a151bc73c77c90a4c8a07a687bf0ad376d8af454b1"
+content-hash = "0a76968ff43ddd30246c8e3692051c134ac8ce8ce5093f197a8288a811022da6"
 
 [metadata.files]
 absl-py = [
@@ -2418,10 +2343,6 @@ cloudpathlib = [
     {file = "cloudpathlib-0.4.1-py3-none-any.whl", hash = "sha256:8e67c0627672ef1c3aff31d9a9e5d950cb7216223bf2846fd6428395fb362567"},
     {file = "cloudpathlib-0.4.1.tar.gz", hash = "sha256:2e80d9aab3a80338235e5651616236cf8ba122ca0a6783533b45bad4ebecb193"},
 ]
-cloudpickle = [
-    {file = "cloudpickle-1.6.0-py3-none-any.whl", hash = "sha256:3a32d0eb0bc6f4d0c57fbc4f3e3780f7a81e6fee0fa935072884d58ae8e1cc7c"},
-    {file = "cloudpickle-1.6.0.tar.gz", hash = "sha256:9bc994f9e9447593bd0a45371f0e7ac7333710fcf64a4eb9834bf149f4ef2f32"},
-]
 clu = [
     {file = "clu-0.0.6-py3-none-any.whl", hash = "sha256:7d28343cd7235b4f6d112c306a5b0ae2fd2596df13fc4427fb1b512e10118042"},
     {file = "clu-0.0.6.tar.gz", hash = "sha256:e1d14662d1c78ed6d453c9c4f18de2dfc25283ec838c3714f5949308ad60e66a"},
@@ -2429,10 +2350,6 @@ clu = [
 colorama = [
     {file = "colorama-0.4.4-py2.py3-none-any.whl", hash = "sha256:9f47eda37229f68eee03b24b9748937c7dc3868f906e8ba69fbcbdd3bc5dc3e2"},
     {file = "colorama-0.4.4.tar.gz", hash = "sha256:5941b2b48a20143d2267e95b1c2a7603ce057ee39fd88e7329b0c292aa16869b"},
-]
-commonmark = [
-    {file = "commonmark-0.9.1-py2.py3-none-any.whl", hash = "sha256:da2f38c92590f83de410ba1a3cbceafbc74fee9def35f9251ba9a971d6d66fd9"},
-    {file = "commonmark-0.9.1.tar.gz", hash = "sha256:452f9dc859be7f06631ddcb328b6919c67984aca654e5fefb3914d54691aed60"},
 ]
 contextlib2 = [
     {file = "contextlib2-21.6.0-py2.py3-none-any.whl", hash = "sha256:3fbdb64466afd23abaf6c977627b75b6139a5a3e8ce38405c5b413aed7a0471f"},
@@ -2545,10 +2462,6 @@ dmvr = []
 einops = [
     {file = "einops-0.3.2-py3-none-any.whl", hash = "sha256:285f3c75620897acb8b5580170c88121f010c77ce130bc7b9f220179009dafe0"},
     {file = "einops-0.3.2.tar.gz", hash = "sha256:5200e413539f0377f4177ef00dc019968f4177c49b1db3e836c7883df2a5fe2e"},
-]
-elegy = [
-    {file = "elegy-0.8.1-py3-none-any.whl", hash = "sha256:80c243172135595c1ceaec2759d20d0530c0732c014163d60dc3fd49e69f618c"},
-    {file = "elegy-0.8.1.tar.gz", hash = "sha256:9bf8476f6c0cb21282017ea5697a918aa4e66e6a72c995b927e93a4be084b3f2"},
 ]
 entrypoints = [
     {file = "entrypoints-0.3-py2.py3-none-any.whl", hash = "sha256:589f874b313739ad35be6e0cd7efde2a4e9b6fea91edcc34e58ecbb8dbe56d19"},
@@ -3464,10 +3377,6 @@ requests-oauthlib = [
     {file = "requests_oauthlib-1.3.0-py2.py3-none-any.whl", hash = "sha256:7f71572defaecd16372f9006f33c2ec8c077c3cfa6f5911a9a90202beb513f3d"},
     {file = "requests_oauthlib-1.3.0-py3.7.egg", hash = "sha256:fa6c47b933f01060936d87ae9327fead68768b69c6c9ea2109c48be30f2d4dbc"},
 ]
-rich = [
-    {file = "rich-10.13.0-py3-none-any.whl", hash = "sha256:96d15285b64dbf8154e0717298d2fdfdbbe03da26a392632c23820068f06c3b3"},
-    {file = "rich-10.13.0.tar.gz", hash = "sha256:d80fc76f34d819c481a48f73ec9ac396bed3bd6a16ecd57f9e0654cd89a8fb56"},
-]
 rsa = [
     {file = "rsa-4.7.2-py3-none-any.whl", hash = "sha256:78f9a9bf4e7be0c5ded4583326e7461e3a3c5aae24073648b4bdfa797d78c9d2"},
     {file = "rsa-4.7.2.tar.gz", hash = "sha256:9d689e6ca1b3038bc82bf8d23e944b6b6037bc02301a574935b2dd946e0353b9"},
@@ -3601,8 +3510,8 @@ tensorboard-plugin-wit = [
     {file = "tensorboard_plugin_wit-1.8.0-py3-none-any.whl", hash = "sha256:2a80d1c551d741e99b2f197bb915d8a133e24adb8da1732b840041860f91183a"},
 ]
 tensorboardx = [
-    {file = "tensorboardX-2.4-py2.py3-none-any.whl", hash = "sha256:2742b1ac3fdef2b938b1110b503c6986b7100a3250394a5a44ef12784b563b55"},
-    {file = "tensorboardX-2.4.tar.gz", hash = "sha256:e56331ee79b7656c6f0974ab2e918045d5e9393701f83cac8884de4b5b360130"},
+    {file = "tensorboardX-2.4.1-py2.py3-none-any.whl", hash = "sha256:209770034b87e99bfa36ecb471462c3bcce6544324b0c891958b65523348c277"},
+    {file = "tensorboardX-2.4.1.tar.gz", hash = "sha256:5beb5c23f604c7df9a10adcf19b8e4b39fcf35576587d1621dcf9efa7b215460"},
 ]
 tensorflow = [
     {file = "tensorflow-2.7.0-cp37-cp37m-macosx_10_11_x86_64.whl", hash = "sha256:12f19d6c7161ffef21e69a14e60aaaf47dc25bff133ac954839f1308262b29bf"},
@@ -3742,14 +3651,6 @@ tqdm = [
 traitlets = [
     {file = "traitlets-5.1.1-py3-none-any.whl", hash = "sha256:2d313cc50a42cd6c277e7d7dc8d4d7fedd06a2c215f78766ae7b1a66277e0033"},
     {file = "traitlets-5.1.1.tar.gz", hash = "sha256:059f456c5a7c1c82b98c2e8c799f39c9b8128f6d0d46941ee118daace9eb70c7"},
-]
-treeo = [
-    {file = "treeo-0.0.8-py3-none-any.whl", hash = "sha256:ccef15103d7214441c43bde2b4af50d6d75ce6237d582afe9b9a8cf3114e04bb"},
-    {file = "treeo-0.0.8.tar.gz", hash = "sha256:d9f334cb78c82e28f9424f796361c401b8dbee7a9055ba5ba041bbf6ee8ab22b"},
-]
-treex = [
-    {file = "treex-0.6.3-py3-none-any.whl", hash = "sha256:05cfbe91dc470ba002c91616df70c6156a194d063880ce19dac1f396a62a693d"},
-    {file = "treex-0.6.3.tar.gz", hash = "sha256:db4accf55f24522d2f584e57fb34b2dff28e55791eb6a6a4231c06350c84c8fb"},
 ]
 typer = [
     {file = "typer-0.3.2-py3-none-any.whl", hash = "sha256:ba58b920ce851b12a2d790143009fa00ac1d05b3ff3257061ff69dbdfc3d161b"},

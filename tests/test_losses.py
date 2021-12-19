@@ -87,10 +87,10 @@ def test_set_criterion_matching_batched(
     boxes_permuted = jnp.array([b[idx] for b, idx in zip(boxes, permutations)])
     labels = np.array([labels] * len(permutations))
     logits = np.array([to_logits(l[perm]) for l, perm in zip(labels, permutations)])
-    logits = 10000 * logits - 5000
+    logits = jnp.array(10000 * logits - 5000)
 
     match = jax.vmap(SetCriterion().match_predictions)
-    indices = match(boxes_permuted, boxes, logits, labels)
+    indices = match(boxes_permuted, boxes, logits, jnp.array(labels))
 
     for idx, perm in zip(indices, permutations):
         idx_pred, idx_true = np.array(idx).T
@@ -139,10 +139,10 @@ def test_batched_set_criterion_loss(
     boxes_permuted = jnp.array([b[idx] for b, idx in zip(boxes, permutations)])
     labels = np.array([labels] * len(permutations))
     logits = np.array([to_logits(l[perm]) for l, perm in zip(labels, permutations)])
-    logits = 10000 * logits - 5000
+    logits = jnp.array(10000 * logits - 5000)
     criterion = jax.vmap(SetCriterion())
 
-    loss, losses = criterion(boxes_permuted, boxes, logits, labels)
+    loss, losses = criterion(boxes_permuted, boxes, logits, jnp.array(labels))
 
     np.testing.assert_array_less(loss, 1e-7)
 

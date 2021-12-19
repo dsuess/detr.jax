@@ -103,10 +103,11 @@ class SetCriterion:
         labels_pred: JaxArray,
         labels_true: JaxArray,
     ) -> Tuple[JaxArray, SetCriterionLosses]:
+        # pylint: disable=too-many-locals
+
         assert (
             box_pred.shape == box_true.shape
         ), "SetCriterion only implemented for square cost matrices"
-        # pylint: disable=too-many-locals
         assignment = self.match_predictions(
             box_pred, box_true, labels_pred, labels_true
         )

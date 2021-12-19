@@ -1,10 +1,18 @@
 # pylint: disable=no-value-for-parameter,unexpected-keyword-arg
-from typing import Callable, Dict, Tuple
+from typing import Callable, Dict, NamedTuple, Tuple
 
 import tensorflow as tf
+import tensorflow_datasets as tfds
 
 DataTuple = Tuple[tf.Tensor, tf.Tensor, tf.Tensor]
 Transform = Callable[[tf.Tensor, tf.Tensor, tf.Tensor], DataTuple]
+
+
+class DataSpec(NamedTuple):
+    name: str
+    data: tf.data.Dataset
+    steps: int
+    n_classes: int
 
 
 def resize_square(new_size: int) -> Transform:
@@ -59,3 +67,41 @@ def pad_boxes(max_boxes: int) -> Transform:
 
 def get_elems(data: Dict) -> DataTuple:
     return data["image"], data["objects"]["bbox"], data["objects"]["label"]
+
+
+def get_coco_datagen(
+    batch_size: int, data_dir: str = "__pycache__/coco", max_boxes: int = 100
+) -> Tuple[DataSpec, DataSpec]:
+    train_ds = (
+        tfds.load(
+            "coco/2017",
+            split="train",
+            download=True,
+            data_dir=data_dir,
+        )
+        .map(get_elems, num_parallel_calls=tf.data.experimental.AUTOTUNE)
+        .map(resize_square(600), num_parallel_calls=tf.data.experimental.AUTOTUNE)
+        .map(pad_boxes(max_boxes), num_parallel_calls=tf.data.experimental.AUTOTUNE)
+        .shuffle(1024)
+        .batch(batch_size, drop_remainder=True)
+        .prefetch(tf.data.experimental.AUTOTUNE)
+    )
+
+    valid_ds = (
+        tfds.load(
+            "coco/2017",
+            split="validation",
+            download=True,
+            data_dir=data_dir,
+        )
+        .map(get_elems, num_parallel_calls=tf.data.experimental.AUTOTUNE)
+        .map(resize_square(600), num_parallel_calls=tf.data.experimental.AUTOTUNE)
+        .map(pad_boxes(max_boxes), num_parallel_calls=tf.data.experimental.AUTOTUNE)
+        .batch(batch_size)
+        .prefetch(tf.data.experimental.AUTOTUNE)
+    )
+
+    return (
+        DataSpec("train", train_ds, len(train_ds), 80),
+        DataSpec("valid", valid_ds, len(valid_ds), 80),
+    )
