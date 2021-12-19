@@ -51,7 +51,6 @@ class SetCriterionLosses(NamedTuple):
     l1_loss: JaxArray
     giou_loss: JaxArray
     labels_loss: JaxArray
-    unmatched_labels_loss: JaxArray
 
 
 class SetCriterion:
@@ -104,6 +103,9 @@ class SetCriterion:
         labels_pred: JaxArray,
         labels_true: JaxArray,
     ) -> Tuple[JaxArray, SetCriterionLosses]:
+        assert (
+            box_pred.shape == box_true.shape
+        ), "SetCriterion only implemented for square cost matrices"
         # pylint: disable=too-many-locals
         assignment = self.match_predictions(
             box_pred, box_true, labels_pred, labels_true
@@ -113,28 +115,21 @@ class SetCriterion:
         # loss for matched boxes
         box_p_valid, labels_p_valid = box_pred[idx_pred], labels_pred[idx_pred]
         box_t_valid, labels_t_valid = box_true[idx_true], labels_true[idx_true]
-        l1_loss = jnp.sum(jnp.linalg.norm(box_p_valid - box_t_valid, axis=-1, ord=1))
-        giou_loss = jnp.sum(1 - box_giou(box_p_valid, box_t_valid))
+        is_valid = (labels_t_valid > 0).astype(jnp.float32)
+
+        l1_loss = jnp.sum(
+            is_valid * jnp.linalg.norm(box_p_valid - box_t_valid, axis=-1, ord=1)
+        )
+        giou_loss = jnp.sum(is_valid * (1 - box_giou(box_p_valid, box_t_valid)))
+
+        label_weight = is_valid + (1 - is_valid) * self.negative_weight
         labels_loss = jnp.sum(
-            -jax.nn.log_softmax(labels_p_valid)[
+            -label_weight
+            * jax.nn.log_softmax(labels_p_valid)[
                 jnp.arange(labels_p_valid.shape[0]), labels_t_valid
             ]
         )
 
-        # loss for unmatched boxes
-        if idx_unmatched.shape[0] > 0:
-            logits = labels_pred[idx_unmatched]
-            labels_loss_unmatched = jnp.sum(-jax.nn.log_softmax(logits)[:, 0])
-        else:
-            labels_loss_unmatched = jnp.array(0)
+        loss = self.l1_weight * l1_loss + self.giou_weight * giou_loss + labels_loss
 
-        loss = (
-            labels_loss
-            + self.negative_weight * labels_loss_unmatched
-            + self.l1_weight * l1_loss
-            + self.giou_weight * giou_loss
-        )
-
-        return loss, SetCriterionLosses(
-            l1_loss, giou_loss, labels_loss, labels_loss_unmatched
-        )
+        return loss, SetCriterionLosses(l1_loss, giou_loss, labels_loss)

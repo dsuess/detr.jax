@@ -128,7 +128,6 @@ def test_set_criterion_loss(
     )
 
     np.testing.assert_array_less(loss, 1e-7)
-    assert losses.unmatched_labels_loss == 0.0
 
 
 def test_batched_set_criterion_loss(
@@ -136,20 +135,16 @@ def test_batched_set_criterion_loss(
 ):
     boxes, labels = some_boxes
     permutations = np.array(list(it.permutations(range(5)))[::10])
-    boxes = np.array([boxes] * len(permutations))
+    boxes = jnp.array([boxes] * len(permutations))
+    boxes_permuted = jnp.array([b[idx] for b, idx in zip(boxes, permutations)])
     labels = np.array([labels] * len(permutations))
-    logits = 10000 * to_logits(labels) - 5000
+    logits = np.array([to_logits(l[perm]) for l, perm in zip(labels, permutations)])
+    logits = 10000 * logits - 5000
     criterion = jax.vmap(SetCriterion())
 
-    loss, losses = criterion(
-        jnp.array(boxes[permutations]),
-        jnp.array(boxes),
-        jnp.array(logits[permutations]),
-        jnp.array(labels),
-    )
+    loss, losses = criterion(boxes_permuted, boxes, logits, labels)
 
     np.testing.assert_array_less(loss, 1e-7)
-    assert losses.unmatched_labels_loss == 0.0
 
 
 @pt.mark.parametrize("permutation", list(it.permutations(range(5)))[::10])
@@ -172,10 +167,9 @@ def test_set_criterion_loss_with_invalid_boxes(
         jnp.array(labels_true),
     )
 
-    assert losses.unmatched_labels_loss > 10.0
     assert losses.l1_loss < 1e-7
     assert losses.giou_loss < 1e-7
-    assert losses.labels_loss < 1e-7
+    assert losses.labels_loss > 10.0
 
 
 @pt.mark.parametrize("permutation", list(it.permutations(range(5)))[::10])
@@ -199,12 +193,12 @@ def test_set_criterion_loss_with_invalid_boxes_correctly_predicted(
         jnp.array(labels_true),
     )
 
-    assert losses.unmatched_labels_loss < 1e-7
     assert losses.l1_loss < 1e-7
     assert losses.giou_loss < 1e-7
     assert losses.labels_loss < 1e-7
 
 
+@pt.mark.skip(reason="TODO: SetCriterion only implemented for square cost matrices")
 @pt.mark.parametrize("permutation", list(it.permutations(range(5)))[::10])
 def test_set_criterion_loss_missing_groundtruth(
     some_boxes: Tuple[np.ndarray, np.ndarray],
@@ -231,7 +225,6 @@ def test_set_criterion_loss_missing_groundtruth(
         jnp.array(labels_true[:-2]),
     )
 
-    assert losses_with.unmatched_labels_loss == losses_without.unmatched_labels_loss
     assert losses_with.l1_loss == losses_without.l1_loss
     assert losses_with.giou_loss == losses_without.giou_loss
     assert losses_with.labels_loss == losses_without.labels_loss
